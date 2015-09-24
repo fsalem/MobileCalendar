@@ -37,6 +37,9 @@ app.get('/', routes.index);
 app.post('/api/events',event.create);
 app.put('/api/events/:eventId',event.update);
 app.del('/api/events/:eventId',event.del);
+app.get('/api/events/:email/:password',event.getAllEvents);
+app.get('/api/events/:startDate/:endDate/:email/:password',event.getSpecificEvents);
+app.get('/api/events/:eventId/:email/:password',event.getEvent);
 app.post('/api/users',user.create);
 
 http.createServer(app).listen(app.get('port'), function(){

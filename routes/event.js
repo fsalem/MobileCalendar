@@ -78,8 +78,6 @@ exports.update = function(req, res) {
 
 };
 
-
-
 /*
  * Delete an event
  * 
@@ -98,7 +96,13 @@ exports.del = function(req, res) {
 			console.log("getting user error => " + err);
 			return res.send(err);
 		}
-		User.findByIdAndUpdate(user._id, { $pull: { 'events': {  _id: req.params.eventId } } }, function(err, model) {
+		User.findByIdAndUpdate(user._id, {
+			$pull : {
+				'events' : {
+					_id : req.params.eventId
+				}
+			}
+		}, function(err, model) {
 			if (err) {
 				console.log("deleting event error => " + err);
 				return res.send(err);
@@ -107,4 +111,107 @@ exports.del = function(req, res) {
 		});
 	});
 
+};
+
+/*
+ * 
+ * Get event params: eventId, email, password
+ * 
+ */
+
+exports.getEvent = function(req, res) {
+
+	var User = require('../models/User');
+	User.findOne({
+		'email' : req.params.email,
+		'password' : req.params.password,
+		'events._id' : req.params.eventId
+	}, 'events', function(err, user) {
+		if (err) {
+			console.log("getting user error => " + err);
+			return res.send(err);
+		}
+		if (!user) {
+			console.log("no user exist ");
+			return res.json({
+				message : 'Invalid user'
+			});
+		}
+		var event = user.events.id(req.params.eventId);
+		return res.json(event);
+	});
+};
+
+/*
+ * 
+ * Get All events params: email, password
+ * 
+ */
+
+exports.getAllEvents = function(req, res) {
+
+	var User = require('../models/User');
+	User.findOne({
+		'email' : req.params.email,
+		'password' : req.params.password
+	}, 'events', function(err, user) {
+		if (err) {
+			console.log("getting user error => " + err);
+			return res.send(err);
+		}
+		if (!user) {
+			console.log("no user exist ");
+			return res.json({
+				message : 'Invalid user'
+			});
+		}
+		return res.json(user.events);
+	});
+};
+
+/*
+ * 
+ * Get period events params: email, password, startDate, endDate
+ * 
+ */
+
+exports.getSpecificEvents = function(req, res) {
+
+	var User = require('../models/User');
+
+	var startDate = new Date(req.params.startDate);
+	var endDate = new Date(req.params.endDate);
+	console.log(startDate + " =>> " + endDate);
+
+	User.aggregate({
+		$match : {
+			'email' : req.params.email,
+			'password' : req.params.password,
+			'events.startDate' : {
+				$gte : startDate,
+				$lte : endDate
+			}
+		}},
+		{$project : {events : true}}, 
+		{$unwind: '$events'},
+		{$match : {
+			'events.startDate' : {
+				$gte : startDate,
+				$lte : endDate
+			}
+		}},
+		function(err,user){
+			console.log (err);
+			console.log (user);
+			return res.json(user);
+		});
+	
+	/*
+	 * User.findOne({ 'email' : req.params.email, 'password' :
+	 * req.params.password, 'events.startDate' : {$gte : startDate, $lte :
+	 * endDate}}, 'events',function(err, user) { if (err) { console.log("getting
+	 * user error => " + err); return res.send(err); } if (!user){
+	 * console.log("no user exist "); return res.json({message: 'Invalid
+	 * user'}); } return res.json(user.events); });
+	 */
 };

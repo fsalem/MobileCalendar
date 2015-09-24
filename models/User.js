@@ -12,8 +12,7 @@ var EventSchema = new Schema({
 	location: String,
 	notify: Boolean,
 	notificationDate: {type: Date, default: null},
-	creationDate: {type: Date, default: Date.now},
-	deactivated: {type: Boolean,default: false}
+	creationDate: {type: Date, default: Date.now}
 });
 
 var UserSchema   = new Schema({
