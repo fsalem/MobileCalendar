@@ -8,8 +8,10 @@ exports.create = function(req, res) {
 		'email' : req.body.email,
 	}, 'email', function(err, user) {
 		if (err) {
-			console.log("Error while searching for the user "+ err);
-			return res.send(err);
+			console.log("Error while searching for the user " + err);
+			return res.json({
+				message : 'error -> ' + err
+			});
 		}
 		if (!user) {
 			console.log("creating a user");
@@ -18,8 +20,10 @@ exports.create = function(req, res) {
 			newUser.password = req.body.password;
 			newUser.save(function(err) {
 				if (err) {
-					console.log("Error while saving -> "+err);
-					return res.send(err);
+					console.log("Error while saving -> " + err);
+					return res.json({
+						message : 'error -> ' + err
+					});
 				}
 				return res.json({
 					message : ' User registered!'

@@ -1,17 +1,9 @@
-
 /**
  * Module dependencies.
  */
 
-var express = require('express')
-  , bodyParser = require('body-parser')
-  , routes = require('./routes')
-  , event = require('./routes/event')
-  , user = require('./routes/user')
-  , http = require('http')
-  , path = require('path')
-  , mongoose   = require('mongoose');
- 
+var express = require('express'), bodyParser = require('body-parser'), routes = require('./routes'), event = require('./routes/event'), user = require('./routes/user'), http = require('http'), path = require('path'), mongoose = require('mongoose');
+
 var app = express();
 
 // all environments
@@ -24,24 +16,28 @@ app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({
+	extended : true
+}));
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://calendar:calendar@ds031763.mongolab.com:31763/scalable_calendar');
+mongoose
+		.connect('mongodb://calendar:calendar@ds031763.mongolab.com:31763/scalable_calendar');
 // development only
 if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+	app.use(express.errorHandler());
 }
 
 app.get('/', routes.index);
-app.post('/api/events',event.create);
-app.put('/api/events/:eventId',event.update);
-app.del('/api/events/:eventId',event.del);
-app.get('/api/events/:email/:password',event.getAllEvents);
-app.get('/api/events/:startDate/:endDate/:email/:password',event.getSpecificEvents);
-app.get('/api/events/:eventId/:email/:password',event.getEvent);
-app.post('/api/users',user.create);
+app.post('/api/events', event.create);
+app.put('/api/events/:eventId', event.update);
+app.del('/api/events/:eventId', event.del);
+app.get('/api/events/:email/:password', event.getAllEvents);
+app.get('/api/events/:startDate/:endDate/:email/:password',
+		event.getSpecificEvents);
+app.get('/api/events/:eventId/:email/:password', event.getEvent);
+app.post('/api/users', user.create);
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+http.createServer(app).listen(app.get('port'), function() {
+	console.log('Express server listening on port ' + app.get('port'));
 });

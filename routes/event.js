@@ -11,7 +11,9 @@ exports.create = function(req, res) {
 	}, 'events', function(err, user) {
 		if (err) {
 			console.log("getting user error => " + err);
-			return res.send(err);
+			return res.json({
+				message : 'error -> ' + err
+			});
 		}
 
 		var event = {
@@ -28,7 +30,9 @@ exports.create = function(req, res) {
 		user.save(function(err) {
 			if (err) {
 				console.log("saving user error => " + err);
-				return res.send(err);
+				return res.json({
+					message : 'error -> ' + err
+				});
 			}
 			res.json({
 				message : req.body.name + ' created!'
@@ -53,7 +57,9 @@ exports.update = function(req, res) {
 	}, 'events', function(err, user) {
 		if (err) {
 			console.log("getting user error => " + err);
-			return res.send(err);
+			return res.json({
+				message : 'error -> ' + err
+			});
 		}
 		User.update({
 			'events._id' : req.params.eventId
@@ -70,7 +76,9 @@ exports.update = function(req, res) {
 		}, function(err, model) {
 			if (err) {
 				console.log("updateing user error => " + err);
-				return res.send(err);
+				return res.json({
+					message : 'error -> ' + err
+				});
 			}
 			res.json(model);
 		});
@@ -94,7 +102,9 @@ exports.del = function(req, res) {
 	}, 'events', function(err, user) {
 		if (err) {
 			console.log("getting user error => " + err);
-			return res.send(err);
+			return res.json({
+				message : 'error -> ' + err
+			});
 		}
 		User.findByIdAndUpdate(user._id, {
 			$pull : {
@@ -105,7 +115,9 @@ exports.del = function(req, res) {
 		}, function(err, model) {
 			if (err) {
 				console.log("deleting event error => " + err);
-				return res.send(err);
+				return res.json({
+					message : 'error -> ' + err
+				});
 			}
 			return res.json(model);
 		});
@@ -129,7 +141,9 @@ exports.getEvent = function(req, res) {
 	}, 'events', function(err, user) {
 		if (err) {
 			console.log("getting user error => " + err);
-			return res.send(err);
+			return res.json({
+				message : 'error -> ' + err
+			});
 		}
 		if (!user) {
 			console.log("no user exist ");
@@ -157,7 +171,9 @@ exports.getAllEvents = function(req, res) {
 	}, 'events', function(err, user) {
 		if (err) {
 			console.log("getting user error => " + err);
-			return res.send(err);
+			return res.json({
+				message : 'error -> ' + err
+			});
 		}
 		if (!user) {
 			console.log("no user exist ");
@@ -181,7 +197,6 @@ exports.getSpecificEvents = function(req, res) {
 
 	var startDate = new Date(req.params.startDate);
 	var endDate = new Date(req.params.endDate);
-	console.log(startDate + " =>> " + endDate);
 
 	User.aggregate({
 		$match : {
@@ -191,27 +206,33 @@ exports.getSpecificEvents = function(req, res) {
 				$gte : startDate,
 				$lte : endDate
 			}
-		}},
-		{$project : {events : true}}, 
-		{$unwind: '$events'},
-		{$match : {
+		}
+	}, {
+		$project : {
+			events : true
+		}
+	}, {
+		$unwind : '$events'
+	}, {
+		$match : {
 			'events.startDate' : {
 				$gte : startDate,
 				$lte : endDate
 			}
-		}},
-		function(err,user){
-			console.log (err);
-			console.log (user);
-			return res.json(user);
-		});
-	
-	/*
-	 * User.findOne({ 'email' : req.params.email, 'password' :
-	 * req.params.password, 'events.startDate' : {$gte : startDate, $lte :
-	 * endDate}}, 'events',function(err, user) { if (err) { console.log("getting
-	 * user error => " + err); return res.send(err); } if (!user){
-	 * console.log("no user exist "); return res.json({message: 'Invalid
-	 * user'}); } return res.json(user.events); });
-	 */
+		}
+	}, function(err, events) {
+		if (err) {
+			console.log("getting events error => " + err);
+			return res.json({
+				message : 'error -> ' + err
+			});
+		}
+		if (!events) {
+			console.log("no events exist ");
+			return res.json({
+				message : 'Invalid user'
+			});
+		}
+		return res.json(events);
+	});
 };
