@@ -10,11 +10,11 @@ var buildJSON = function(err, res, operation, data) {
 				success : 0,
 				error : err.message
 			};
-		}else{
+		} else {
 			result = {
-					success : 0,
-					error : err
-				};
+				success : 0,
+				error : err
+			};
 		}
 		return res.json(result);
 
@@ -59,16 +59,24 @@ exports.create = function(req, res) {
 		if (user === null) {
 			return buildJSON("Bad Credential", res, "create", null);
 		}
-
+		var startDate = Number(req.body.sDate);
+		var endDate = Number(req.body.eDate);
+		var notificationDate = null;
+		
+		if (req.body.nDate !== null && req.body.nDate !== "null"){
+			notificationDate = Number(req.body.nDate);
+		}
+		
 		var event = {
 			title : req.body.name,
 			description : req.body.desc,
-			startDate : req.body.sDate,
-			endDate : req.body.eDate,
+			start : startDate,
+			end : endDate,
 			location : req.body.location,
-			eventClass: req.body.eventClass,
+			eventClass : req.body.eventClass,
 			notify : req.body.notify,
-			notificationDate : req.body.nDate
+			notificationDate : notificationDate,
+			creationDate: Date.now()
 		};
 
 		user.events.push(event);
@@ -98,12 +106,18 @@ exports.update = function(req, res) {
 		if (err) {
 			return buildJSON(err, res, "create", null);
 		}
-		if (user === null){
+		if (user === null) {
 			return buildJSON("Bad Credential", res, "put", null);
 		}
 		var event = user.events.id(req.params.eventId);
-		if (event === null){
+		if (event === null) {
 			return buildJSON("Invalid Event ID", res, "put", null);
+		}
+		var startDate = Number(req.body.sDate);
+		var endDate = Number(req.body.eDate);
+		var notificationDate = null;
+		if (req.body.nDate !== null && req.body.nDate !== "null"){
+			notificationDate = Number(req.body.nDate);
 		}
 		User.update({
 			'events._id' : req.params.eventId
@@ -111,12 +125,12 @@ exports.update = function(req, res) {
 			'$set' : {
 				'events.$.title' : req.body.name,
 				'events.$.description' : req.body.desc,
-				'events.$.startDate' : req.body.sDate,
-				'events.$.endDate' : req.body.eDate,
+				'events.$.start' : startDate,
+				'events.$.end' : endDate,
 				'events.$.location' : req.body.location,
 				'events.$.eventClass' : req.body.eventClass,
 				'events.$.notify' : req.body.notify,
-				'events.$.notificationDate' : req.body.nDate
+				'events.$.notificationDate' : notificationDate
 			}
 		}, function(err, model) {
 			return buildJSON(err, res, "put", model);
@@ -171,14 +185,14 @@ exports.getEvent = function(req, res) {
 		'password' : req.params.password
 	}, 'events', function(err, user) {
 		if (err) {
-			
+
 			return buildJSON(err, res, "get", null);
 		}
 		if (user === null) {
 			return buildJSON("Bad Credential", res, "get", null);
 		}
 		var event = user.events.id(req.params.eventId);
-		if (event === null){
+		if (event === null) {
 			return buildJSON("Invalid Event ID", res, "get", null);
 		}
 		return buildJSON(err, res, "get", event);
@@ -199,18 +213,12 @@ exports.getAllEvents = function(req, res) {
 		'password' : req.params.password
 	}, 'events', function(err, user) {
 		if (err) {
-			console.log("getting user error => " + err);
-			return res.json({
-				message : 'error -> ' + err
-			});
+			return buildJSON(err, res, "get", null);
 		}
-		if (!user) {
-			console.log("no user exist ");
-			return res.json({
-				message : 'Invalid user'
-			});
+		if (user === null) {
+			return buildJSON("Bad Credential", res, "get", null);
 		}
-		return res.json(user.events);
+		return buildJSON(err, res, "get", user.events);
 	});
 };
 
@@ -223,15 +231,15 @@ exports.getAllEvents = function(req, res) {
 exports.getSpecificEvents = function(req, res) {
 
 	var User = require('../models/User');
-
-	var startDate = new Date(req.params.startDate);
-	var endDate = new Date(req.params.endDate);
-
+	
+	var startDate = Number(req.params.startDate);
+	var endDate = Number(req.params.endDate);
+	
 	User.aggregate({
 		$match : {
 			'email' : req.params.email,
 			'password' : req.params.password,
-			'events.startDate' : {
+			'events.start' : {
 				$gte : startDate,
 				$lte : endDate
 			}
@@ -244,24 +252,15 @@ exports.getSpecificEvents = function(req, res) {
 		$unwind : '$events'
 	}, {
 		$match : {
-			'events.startDate' : {
+			'events.start' : {
 				$gte : startDate,
 				$lte : endDate
 			}
 		}
 	}, function(err, events) {
 		if (err) {
-			console.log("getting events error => " + err);
-			return res.json({
-				message : 'error -> ' + err
-			});
+			return buildJSON(err, res, "get", null);
 		}
-		if (!events) {
-			console.log("no events exist ");
-			return res.json({
-				message : 'Invalid user'
-			});
-		}
-		return res.json(events);
+		return buildJSON(err, res, "get", events);
 	});
 };

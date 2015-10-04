@@ -7,12 +7,12 @@ var Schema       = mongoose.Schema;
 var EventSchema = new Schema({
 	title: String,
 	description: String,
-	start: Date,
-	end: Date,
+	start: Number,
+	end: Number,
 	location: String,
 	eventClass: String,
 	notify: Boolean,
-	notificationDate: {type: Date, default: null},
+	notificationDate: {type: Number, default: null},
 	creationDate: {type: Date, default: Date.now}
 });
 
