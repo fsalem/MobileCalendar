@@ -1,5 +1,49 @@
+/**
+ * function for building response object
+ */
+
+var buildJSON = function(err, res, operation, data) {
+	var result = [];
+	if (err) {
+		if (typeof err.message !== 'undefined') {
+			result = {
+				success : 0,
+				error : err.message
+			};
+		}else{
+			result = {
+					success : 0,
+					error : err
+				};
+		}
+		return res.json(result);
+
+	}
+	if (operation === "create") {
+		result = {
+			success : 1,
+			id : data
+		};
+	}
+	if (operation === "put" || operation === "delete") {
+		result = {
+			success : 1
+		};
+	}
+	if (operation === "get") {
+		var resList = [];
+
+		result = {
+			"success" : 1,
+			"result" : data
+		};
+	}
+	return res.json(result);
+
+};
+
 /*
- * events.
+ * create events.
  */
 
 exports.create = function(req, res) {
@@ -8,42 +52,39 @@ exports.create = function(req, res) {
 	User.findOne({
 		'email' : req.body.email,
 		'password' : req.body.password
-	}, 'events', function(err, user) {
+	}, function(err, user) {
 		if (err) {
-			console.log("getting user error => " + err);
-			return res.json({
-				message : 'error -> ' + err
-			});
+			return buildJSON(err, res, "create", null);
+		}
+		if (user === null) {
+			return buildJSON("Bad Credential", res, "create", null);
 		}
 
 		var event = {
-			name : req.body.name,
+			title : req.body.name,
 			description : req.body.desc,
 			startDate : req.body.sDate,
 			endDate : req.body.eDate,
 			location : req.body.location,
+			eventClass: req.body.eventClass,
 			notify : req.body.notify,
 			notificationDate : req.body.nDate
 		};
 
 		user.events.push(event);
-		user.save(function(err) {
+		user.save(function(err, returnedData) {
 			if (err) {
-				console.log("saving user error => " + err);
-				return res.json({
-					message : 'error -> ' + err
-				});
+				console.log("saving event error => " + err);
 			}
-			res.json({
-				message : req.body.name + ' created!'
-			});
+			return buildJSON(err, res, "create",
+					returnedData.events[returnedData.events.length - 1].id);
 		});
 	});
 
 };
 
 /**
- * Event update code
+ * update Event
  */
 
 exports.update = function(req, res) {
@@ -52,41 +93,39 @@ exports.update = function(req, res) {
 	// var Events = require('../models/Event');
 	User.findOne({
 		'email' : req.body.email,
-		'password' : req.body.password,
-		'events._id' : req.params.eventId
+		'password' : req.body.password
 	}, 'events', function(err, user) {
 		if (err) {
-			console.log("getting user error => " + err);
-			return res.json({
-				message : 'error -> ' + err
-			});
+			return buildJSON(err, res, "create", null);
+		}
+		if (user === null){
+			return buildJSON("Bad Credential", res, "put", null);
+		}
+		var event = user.events.id(req.params.eventId);
+		if (event === null){
+			return buildJSON("Invalid Event ID", res, "put", null);
 		}
 		User.update({
 			'events._id' : req.params.eventId
 		}, {
 			'$set' : {
-				'events.$.name' : req.body.name,
+				'events.$.title' : req.body.name,
 				'events.$.description' : req.body.desc,
 				'events.$.startDate' : req.body.sDate,
 				'events.$.endDate' : req.body.eDate,
 				'events.$.location' : req.body.location,
+				'events.$.eventClass' : req.body.eventClass,
 				'events.$.notify' : req.body.notify,
 				'events.$.notificationDate' : req.body.nDate
 			}
 		}, function(err, model) {
-			if (err) {
-				console.log("updateing user error => " + err);
-				return res.json({
-					message : 'error -> ' + err
-				});
-			}
-			res.json(model);
+			return buildJSON(err, res, "put", model);
 		});
 	});
 
 };
 
-/*
+/**
  * Delete an event
  * 
  */
@@ -97,14 +136,13 @@ exports.del = function(req, res) {
 	// var Events = require('../models/Event');
 	User.findOne({
 		'email' : req.body.email,
-		'password' : req.body.password,
-		'events._id' : req.params.eventId
-	}, 'events', function(err, user) {
+		'password' : req.body.password
+	}, function(err, user) {
 		if (err) {
-			console.log("getting user error => " + err);
-			return res.json({
-				message : 'error -> ' + err
-			});
+			return buildJSON(err, res, "delete", null);
+		}
+		if (user === null) {
+			return buildJSON("Bad Credential", res, "delete", null);
 		}
 		User.findByIdAndUpdate(user._id, {
 			$pull : {
@@ -113,19 +151,13 @@ exports.del = function(req, res) {
 				}
 			}
 		}, function(err, model) {
-			if (err) {
-				console.log("deleting event error => " + err);
-				return res.json({
-					message : 'error -> ' + err
-				});
-			}
-			return res.json(model);
+			return buildJSON(err, res, "delete", null);
 		});
 	});
 
 };
 
-/*
+/**
  * 
  * Get event params: eventId, email, password
  * 
@@ -136,27 +168,24 @@ exports.getEvent = function(req, res) {
 	var User = require('../models/User');
 	User.findOne({
 		'email' : req.params.email,
-		'password' : req.params.password,
-		'events._id' : req.params.eventId
+		'password' : req.params.password
 	}, 'events', function(err, user) {
 		if (err) {
-			console.log("getting user error => " + err);
-			return res.json({
-				message : 'error -> ' + err
-			});
+			
+			return buildJSON(err, res, "get", null);
 		}
-		if (!user) {
-			console.log("no user exist ");
-			return res.json({
-				message : 'Invalid user'
-			});
+		if (user === null) {
+			return buildJSON("Bad Credential", res, "get", null);
 		}
 		var event = user.events.id(req.params.eventId);
-		return res.json(event);
+		if (event === null){
+			return buildJSON("Invalid Event ID", res, "get", null);
+		}
+		return buildJSON(err, res, "get", event);
 	});
 };
 
-/*
+/**
  * 
  * Get All events params: email, password
  * 
@@ -185,7 +214,7 @@ exports.getAllEvents = function(req, res) {
 	});
 };
 
-/*
+/**
  * 
  * Get period events params: email, password, startDate, endDate
  * 

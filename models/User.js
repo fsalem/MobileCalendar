@@ -5,11 +5,12 @@ var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema;
 
 var EventSchema = new Schema({
-	name: String,
+	title: String,
 	description: String,
-	startDate: Date,
-	endDate: Date,
+	start: Date,
+	end: Date,
 	location: String,
+	eventClass: String,
 	notify: Boolean,
 	notificationDate: {type: Date, default: null},
 	creationDate: {type: Date, default: Date.now}
