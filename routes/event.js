@@ -372,7 +372,7 @@ exports.searchByText = function(req, res) {
 		$match : {
 			'email' : req.params.email,
 			'password' : req.params.password,
-			$or :[{'events.title': new RegExp('^'+req.params.text+'$', "i")},{'events.description':new RegExp('^'+req.params.text+'$', "i")}]
+			$or :[{'events.title': new RegExp(req.params.text, "i")},{'events.description':new RegExp(req.params.text, "i")}]
 		}
 	}, {
 		$project : {
@@ -382,7 +382,7 @@ exports.searchByText = function(req, res) {
 		$unwind : '$events'
 	}, {
 		$match : {
-			$or :[{'events.title': new RegExp('^'+req.params.text+'$', "i")},{'events.description':new RegExp('^'+req.params.text+'$', "i")}]
+			$or :[{'events.title': new RegExp(req.params.text, "i")},{'events.description':new RegExp(req.params.text, "i")}]
 		}
 	}, function(err, events) {
 		if (err) {
