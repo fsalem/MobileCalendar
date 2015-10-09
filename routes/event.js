@@ -48,7 +48,7 @@ var buildJSON = function(err, res, operation, data) {
 
 exports.create = function(req, res) {
 	var User = require('../models/User');
-	var Notification = require('notification');
+	var Notification = require('./notification');
 	User.findOne({
 		'email' : req.body.email,
 		'password' : req.body.password
@@ -102,7 +102,7 @@ exports.create = function(req, res) {
 exports.update = function(req, res) {
 
 	var User = require('../models/User');
-	var Notification = require('notification');
+	var Notification = require('./notification');
 	// var Events = require('../models/Event');
 	User.findOne({
 		'email' : req.body.email,
@@ -163,7 +163,7 @@ exports.update = function(req, res) {
 exports.del = function(req, res) {
 
 	var User = require('../models/User');
-	var Notification = require('notification');
+	var Notification = require('./notification');
 	// var Events = require('../models/Event');
 	User.findOne({
 		'email' : req.body.email,
