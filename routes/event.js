@@ -277,11 +277,11 @@ exports.getSpecificEvents = function(req, res) {
 				$lte : endDate
 			}
 		}
-	}, function(err, user) {
+	}, function(err, events) {
 		if (err) {
 			return buildJSON(err, res, "get", null);
 		}
-		return buildJSON(err, res, "get", user.events);
+		return buildJSON(err, res, "get", events);
 	});
 };
 
@@ -315,11 +315,11 @@ exports.searchByLocation = function(req, res) {
 		$match : {
 			'events.location' : req.params.location
 		}
-	}, function(err, user) {
+	}, function(err, events) {
 		if (err) {
 			return buildJSON(err, res, "get", null);
 		}
-		return buildJSON(err, res, "get", user.events);
+		return buildJSON(err, res, "get", events);
 	});
 };
 
@@ -349,11 +349,11 @@ exports.searchByClass = function(req, res) {
 		$match : {
 			'events.eventClass' : req.params.eventClass
 		}
-	}, function(err, user) {
+	}, function(err, events) {
 		if (err) {
 			return buildJSON(err, res, "get", null);
 		}
-		return buildJSON(err, res, "get", user.events);
+		return buildJSON(err, res, "get", events);
 	});
 };
 
@@ -384,10 +384,10 @@ exports.searchByText = function(req, res) {
 		$match : {
 			$or :[{'events.title': new RegExp('^'+req.params.text+'$', "i")},{'events.description':new RegExp('^'+req.params.text+'$', "i")}]
 		}
-	}, function(err, user) {
+	}, function(err, events) {
 		if (err) {
 			return buildJSON(err, res, "get", null);
 		}
-		return buildJSON(err, res, "get", user.events);
+		return buildJSON(err, res, "get", events);
 	});
 };
