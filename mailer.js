@@ -75,7 +75,7 @@ massMailer.prototype.SendEmail = function(eventId,Email, Title, callback) {
 	// Once every instance is done final callback will be called.
 	async.waterfall([ function(callback) {
 		var mailOptions = {
-			from : 'koko.calendar.noreply@gmail.com',
+			from : senderEmail,
 			to : Email,
 			subject : 'Koko Calendar: Event Notification',
 			text : "Hello<br/>, you need to pay attention with your event " + Title

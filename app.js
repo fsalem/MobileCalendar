@@ -13,10 +13,11 @@ var mongoose = require('mongoose');
 var PropertiesReader = require('properties-reader');
 var properties = new PropertiesReader('params.properties');
 var connectionURL = properties.get('monogoDB.connection.url');
+var runningPort = properties.get('application.port');
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 8080);
+app.set('port', process.env.PORT || runningPort);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(express.favicon());
