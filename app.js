@@ -2,8 +2,17 @@
  * Module dependencies.
  */
 
-var express = require('express'), bodyParser = require('body-parser'), routes = require('./routes'), event = require('./routes/event'), user = require('./routes/user'), http = require('http'), path = require('path'), mongoose = require('mongoose');
-
+var express = require('express');
+var bodyParser = require('body-parser');
+var routes = require('./routes');
+var event = require('./routes/event');
+var user = require('./routes/user');
+var http = require('http');
+var path = require('path');
+var mongoose = require('mongoose');
+var PropertiesReader = require('properties-reader');
+var properties = new PropertiesReader('params.properties');
+var connectionURL = properties.get('monogoDB.connection.url');
 var app = express();
 
 // all environments
@@ -20,9 +29,7 @@ app.use(bodyParser.urlencoded({
 	extended : true
 }));
 app.use(bodyParser.json());
-
-mongoose
-		.connect('mongodb://calendar:calendar@ds031763.mongolab.com:31763/scalable_calendar');
+mongoose.connect(connectionURL);
 // development only
 if ('development' == app.get('env')) {
 	app.use(express.errorHandler());
@@ -33,11 +40,16 @@ app.post('/api/events', event.create);
 app.put('/api/events/:eventId', event.update);
 app.del('/api/events/:eventId', event.del);
 app.get('/api/events/:email/:password', event.getAllEvents);
-app.get('/api/events/:startDate/:endDate/:email/:password',
-		event.getSpecificEvents);
 app.get('/api/events/:eventId/:email/:password', event.getEvent);
-app.post('/api/users', user.create);
+app.get('/api/events/search/period/:startDate/:endDate/:email/:password',
+		event.getSpecificEvents);
+app.get('/api/events/search/location/:location/:email/:password',
+		event.searchByLocation);
+app.get('/api/events/search/class/:eventClass/:email/:password',
+		event.searchByClass);
+app.get('/api/events/search/text/:text/:email/:password', event.searchByText);
 
+app.post('/api/users', user.create);
 
 http.createServer(app).listen(app.get('port'), function() {
 	console.log('Express server listening on port ' + app.get('port'));

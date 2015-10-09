@@ -1,17 +1,60 @@
-/*
- * users.
+var User = require('../models/User');
+/**
+ * function for building response object
+ */
+
+var buildJSON = function(err, res, operation, data) {
+	var result = [];
+	if (err) {
+		if (typeof err.message !== 'undefined') {
+			result = {
+				success : 0,
+				error : err.message
+			};
+		} else {
+			result = {
+				success : 0,
+				error : err
+			};
+		}
+		return res.json(result);
+
+	}
+	if (operation === "create") {
+		result = {
+			success : 1,
+			result : data
+		};
+	}
+
+	if (operation === "login") {
+		if (data) {
+			result = {
+				success : 1
+			};
+		} else {
+			result = {
+				success : 0
+			};
+		}
+	}
+	return res.json(result);
+
+};
+
+/**
+ * 
+ */
+/**
+ * register users.
  */
 
 exports.create = function(req, res) {
-	var User = require('../models/User');
 	User.findOne({
 		'email' : req.body.email,
 	}, 'email', function(err, user) {
 		if (err) {
-			console.log("Error while searching for the user " + err);
-			return res.json({
-				message : 'error -> ' + err
-			});
+			return buildJSON(err, res, "create", null);
 		}
 		if (!user) {
 			console.log("creating a user");
@@ -20,20 +63,14 @@ exports.create = function(req, res) {
 			newUser.password = req.body.password;
 			newUser.save(function(err) {
 				if (err) {
-					console.log("Error while saving -> " + err);
-					return res.json({
-						message : 'error -> ' + err
-					});
+					return buildJSON(err, res, "create", null);
 				}
-				return res.json({
-					message : ' User registered!'
-				});
+				return buildJSON(null, res, "create",
+						"User creation succeeded!");
 			});
 		}
 		if (user) {
-			return res.json({
-				message : ' Already Exist'
-			});
+			return buildJSON("User is already exist", res, "create", null);
 		}
 	});
 
