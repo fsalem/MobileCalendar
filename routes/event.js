@@ -277,11 +277,11 @@ exports.getSpecificEvents = function(req, res) {
 				$lte : endDate
 			}
 		}
-	}, function(err, events) {
+	}, function(err, user) {
 		if (err) {
 			return buildJSON(err, res, "get", null);
 		}
-		return buildJSON(err, res, "get", events);
+		return buildJSON(err, res, "get", user.events);
 	});
 };
 
