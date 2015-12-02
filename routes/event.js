@@ -62,7 +62,7 @@ exports.create = function(req, res) {
 		var startDate = Number(req.body.sDate);
 		var endDate = Number(req.body.eDate);
 		var notificationDate = null;
-
+		console.log("sDate = "+req.body.sDate+" & eDate = "+req.body.eDate+" & nDate = "+req.body.nDate);
 		if (req.body.nDate !== null && req.body.nDate !== "null") {
 			notificationDate = Number(req.body.nDate);
 		}

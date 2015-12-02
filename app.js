@@ -51,6 +51,7 @@ app.get('/api/events/search/class/:eventClass/:email/:password',
 app.get('/api/events/search/text/:text/:email/:password', event.searchByText);
 
 app.post('/api/users', user.create);
+app.post('/api/users/login', user.login);
 
 http.createServer(app).listen(app.get('port'), function() {
 	console.log('Express server listening on port ' + app.get('port'));

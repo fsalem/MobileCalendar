@@ -75,3 +75,25 @@ exports.create = function(req, res) {
 	});
 
 };
+
+/**
+ * Login user.
+ */
+
+exports.login = function(req, res) {
+	User.findOne({
+		'email' : req.body.email,
+		'password' : req.body.password
+	}, function(err, user) {
+		if (err) {
+			return buildJSON(err, res, "login", null);
+		}
+		if (!user) {
+			return buildJSON("Bad Credential", res, "login", null);
+		}
+		if (user) {
+			return buildJSON(null, res, "create", "Success");
+		}
+	});
+
+};
